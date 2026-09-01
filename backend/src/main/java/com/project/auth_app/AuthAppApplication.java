@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AuthAppApplication {
 
 	public static void main(String[] args) {
-//		SpringApplication.run(AuthAppApplication.class, args);
-		System.out.println("Hello wor");
+		SpringApplication.run(AuthAppApplication.class, args);
+//		System.out.println("Hello wor");
 	}
 
 
