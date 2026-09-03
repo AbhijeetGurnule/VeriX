@@ -1,4 +1,4 @@
-package com.project.auth_app.services;
+package com.project.auth_app.services.impl;
 
 import com.project.auth_app.dtos.UserDto;
 import com.project.auth_app.entities.Provider;
@@ -6,11 +6,13 @@ import com.project.auth_app.entities.User;
 import com.project.auth_app.exceptions.ResourceNotFoundException;
 import com.project.auth_app.helpers.UserHelper;
 import com.project.auth_app.repositories.UserRepository;
+import com.project.auth_app.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -65,6 +67,7 @@ public class UserServiceImpl implements UserService {
         // TODO: Change the password update logic
         if(userDto.getPassword() != null) existingUser.setPassword(userDto.getPassword());
         existingUser.setEnable(userDto.isEnable());
+        existingUser.setUpdatedAt(Instant.now());
         User updatedUser = userRepository.save(existingUser);
         return modelMapper.map(updatedUser, UserDto.class);
     }
