@@ -43,7 +43,7 @@ public class SecurityConfig {
                 // this exception will run only when someone unauthenticated person trie to access our protected API's from outside
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
                     // Error Message sendTo client
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     response.setStatus(401);
                     response.setContentType("application/json");
                     String message = e.getMessage();
