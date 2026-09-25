@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
 
-                // checks for access token
+                // checks for access token or while parsing
                 if (!jwtService.isAccessToken(token)) {
                     filterChain.doFilter(request, response);
                     return;
@@ -78,21 +78,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         });
 
             } catch (ExpiredJwtException e) {
-                logger.warn("JWT expired: {}", e.getMessage());
+//                logger.warn("JWT expired: {}", e.getMessage());
+                request.setAttribute("error", "Token Expired");
 
-            } catch (MalformedJwtException e) {
-                logger.warn("Malformed JWT: {}", e.getMessage());
-
-            } catch (JwtException e) {
-                logger.warn("JWT error: {}", e.getMessage());
-
-            } catch (Exception e) {
-                logger.error("Unexpected error during JWT authentication", e);
-
+            }
+//            catch (MalformedJwtException e) {
+////                logger.warn("Malformed JWT: {}", e.getMessage());
+//                request.setAttribute("error", "Invalid Token");
+//
+//            } catch (JwtException e) {
+////                logger.warn("JWT error: {}", e.getMessage());
+//                request.setAttribute("error", "Invalid Token");
+//
+//            }
+            catch (Exception e) {
+//                logger.error("Unexpected error during JWT authentication", e);
+                request.setAttribute("error", "Invalid Token");
             }
 
         }
 
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return request.getRequestURI().startsWith("/api/v1/auth");
+    }
 }
+

@@ -39,24 +39,17 @@ security:
   jwt:
     # Secret key used to sign JWT tokens
     secret: ${JWT_SECRET:ykSehTnIdnomaiDAekiL;hgiHoSdlroWehTevobApU;erAuoYtahWrednoWIwoH;ratSelttiLelkniwTelkniwT}
-
     # Identifies the application that issues the token
     issuer: ${JWT_ISSUER:api.substring.com}
-
     # Access token validity: 1 hour
     access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600}
-
     # Refresh token validity: 24 hours
     refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:86400}
-
     # Name of the refresh token cookie
     refresh-token-cookie-name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
-
     # Send cookie only over HTTPS
     cookie-secure: ${JWT_COOKIE_SECURE:true}
-
     # Prevent JavaScript from accessing the cookie
     cookie-http-only: ${JWT_COOKIE_HTTP_ONLY:true}
-
     # Restrict cross-site cookie requests
     cookie-same-site: ${JWT_COOKIE_SAME_SITE:lax}
