@@ -7,8 +7,10 @@ import com.project.auth_app.entities.RefreshToken;
 import com.project.auth_app.entities.User;
 import com.project.auth_app.repositories.RefreshTokenRepository;
 import com.project.auth_app.repositories.UserRepository;
+import com.project.auth_app.security.CookieService;
 import com.project.auth_app.security.JwtService;
 import com.project.auth_app.services.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -32,21 +34,22 @@ import java.util.UUID;
 public class AuthController {
 
     private final AuthService authService;
-    private final RefreshTokenRepository  refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final ModelMapper mapper;
+    private final CookieService cookieService;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(
-            @RequestBody LoginRequest loginRequest
-    ){
+            @RequestBody LoginRequest loginRequest, HttpServletResponse response
+    ) {
         // authenticate
         Authentication authenticate = authenticate(loginRequest);
-        User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(()-> new BadCredentialsException("Invalid email or password"));
-        if(!user.isEnabled()){
+        User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+        if (!user.isEnabled()) {
             throw new DisabledException("User is disabled");
         }
 
@@ -66,6 +69,10 @@ public class AuthController {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, refreshTokenOb.getJti());
 
+        // use cookie service to attach refresh token in cookie
+        cookieService.attachRefreshCookie(response, refreshToken, (int) jwtService.getRefreshTtlSeconds());
+        cookieService.addNoStoreCookie(response);
+
         TokenResponse tokenResponse = TokenResponse.of(accessToken, refreshToken, jwtService.getAccessTtlSeconds(), mapper.map(user, UserDto.class));
         return ResponseEntity.ok(tokenResponse);
 
@@ -74,13 +81,13 @@ public class AuthController {
     private Authentication authenticate(LoginRequest loginRequest) {
         try {
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new BadCredentialsException("Invalid username or password");
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto){
+    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(userDto));
     }
 }

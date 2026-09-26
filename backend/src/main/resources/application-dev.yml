@@ -53,3 +53,5 @@ security:
     cookie-http-only: ${JWT_COOKIE_HTTP_ONLY:true}
     # Restrict cross-site cookie requests
     cookie-same-site: ${JWT_COOKIE_SAME_SITE:lax}
+    # Restrict the refresh token cookie to this domain and its subdomains
+    cookie-domain: ${JWT_COOKIE_DOMAIN:localhost}
