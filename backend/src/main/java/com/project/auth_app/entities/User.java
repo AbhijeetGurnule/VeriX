@@ -23,7 +23,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
     private UUID id;
-    @Column(name = "user_email",  unique = true)
+    @Column(name = "user_email", unique = true)
     private String email;
     @Column(name = "user_name", length = 500)
     private String name;
@@ -40,6 +40,7 @@ public class User implements UserDetails {
     // In case of using NO PROVIDER then use below
     @Enumerated(EnumType.STRING)
     private Provider provider = Provider.LOCAL;
+    private String providerId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
