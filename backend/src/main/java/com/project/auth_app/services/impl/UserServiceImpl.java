@@ -1,10 +1,13 @@
 package com.project.auth_app.services.impl;
 
+import com.project.auth_app.config.AppConstants;
 import com.project.auth_app.dtos.UserDto;
 import com.project.auth_app.entities.Provider;
+import com.project.auth_app.entities.Role;
 import com.project.auth_app.entities.User;
 import com.project.auth_app.exceptions.ResourceNotFoundException;
 import com.project.auth_app.helpers.UserHelper;
+import com.project.auth_app.repositories.RoleRepository;
 import com.project.auth_app.repositories.UserRepository;
 import com.project.auth_app.services.UserService;
 import jakarta.transaction.Transactional;
@@ -22,6 +25,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    private final RoleRepository roleRepository;
+
     @Override
     @Transactional
     public UserDto createUser(UserDto userDto) {
@@ -37,7 +42,11 @@ public class UserServiceImpl implements UserService {
         // here we are making conversion of UserDto to an Entity
         User user = modelMapper.map(userDto, User.class);
         user.setProvider(userDto.getProvider()!=null ? userDto.getProvider() : Provider.LOCAL);
-        // TODO: role assign here to user --for authorization
+        // TODO: role assign here to user --for authorization (done)
+        // assign default role
+        Role role = roleRepository.findByName("ROLE_" + AppConstants.GUEST_ROLE).orElse(null);
+        user.getRoles().add(role);
+
         User savedUser = userRepository.save(user);
 
         // TODO: if you have extra checks --put here + add next

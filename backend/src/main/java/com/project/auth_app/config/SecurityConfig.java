@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -49,6 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers(AppConstants.AUTH_PUBLIC_URLS).permitAll()
+                                .requestMatchers(HttpMethod.GET).hasRole(AppConstants.GUEST_ROLE)
+                                .requestMatchers("/api/v1/users/**").hasRole(AppConstants.ADMIN_ROLE)
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 ->
@@ -58,22 +63,36 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 // this exception will run only when someone unauthenticated person trie to access our protected API's from outside
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
-                    // Error Message sendTo client
+                                    // Error Message sendTo client
 //                    e.printStackTrace();
-                    response.setStatus(401);
-                    response.setContentType("application/json");
-                    String message = e.getMessage();
+                                    response.setStatus(401);
+                                    response.setContentType("application/json");
+                                    String message = e.getMessage();
 
-                    String error = request.getAttribute("error").toString();
-                    if (error != null) {
-                        message = error;
-                    }
+                                    String error = request.getAttribute("error").toString();
+                                    if (error != null) {
+                                        message = error;
+                                    }
 
 //                    Map<String, Object> errorMap = Map.of("message", message,"statusCode", 401);
-                    var apiError = ApiError.of(HttpStatus.UNAUTHORIZED.value(), "Unauthorized Access", message, request.getRequestURI());
-                    var objectMapper = new ObjectMapper();
-                    response.getWriter().write(objectMapper.writeValueAsString(apiError));
-                }))
+                                    var apiError = ApiError.of(HttpStatus.UNAUTHORIZED.value(), "Unauthorized Access", message, request.getRequestURI());
+                                    var objectMapper = new ObjectMapper();
+                                    response.getWriter().write(objectMapper.writeValueAsString(apiError));
+                                })
+                                .accessDeniedHandler((request, response, e) -> {
+
+                                    response.setStatus(403);
+                                    response.setContentType("application/json");
+                                    String message = e.getMessage();
+                                    String error = (String) request.getAttribute("error");
+                                    if (error != null) {
+                                        message = error;
+                                    }
+                                    var apiError = ApiError.of(HttpStatus.FORBIDDEN.value(), "Forbidden Access", message, request.getRequestURI());
+                                    var objectMapper = new ObjectMapper();
+                                    response.getWriter().write(objectMapper.writeValueAsString(apiError));
+                                })
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 //                .httpBasic(Customizer.withDefaults());    -- we are removing this because we aren't using basic security now

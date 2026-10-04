@@ -1,6 +1,9 @@
 package com.project.auth_app.services.impl;
 
+import com.project.auth_app.config.AppConstants;
 import com.project.auth_app.dtos.UserDto;
+import com.project.auth_app.entities.Role;
+import com.project.auth_app.repositories.RoleRepository;
 import com.project.auth_app.services.AuthService;
 import com.project.auth_app.services.UserService;
 import lombok.AllArgsConstructor;
@@ -19,6 +22,7 @@ public class AuthServiceImpl implements AuthService {
 //        login
 //        verify email
 //        verify password
+//        default roles
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         return userService.createUser(userDto);
     }
