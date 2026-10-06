@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
             CredentialsExpiredException.class,
             DisabledException.class
     })
-    public ResponseEntity<ApiError> handleAuthException(Exception e, HttpServletRequest request){
+    public ResponseEntity<ApiError> handleAuthException(Exception e, HttpServletRequest request) {
         logger.info("Exception : {}", e.getClass().getName());
         var apiError = ApiError.of(HttpStatus.BAD_REQUEST.value(), "Bad Request", e.getMessage(), request.getRequestURI());
         return ResponseEntity.badRequest().body(apiError);
@@ -35,14 +35,14 @@ public class GlobalExceptionHandler {
 
     // Resource not found exception handler :: method
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException exception){
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException exception) {
         ErrorResponse internalServerError = new ErrorResponse(exception.getMessage(), HttpStatus.NOT_FOUND, 404);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(internalServerError);
     }
 
     // Illegal argument exception :: method
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException exception){
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException exception) {
         ErrorResponse internalServerError = new ErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST, 400);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(internalServerError);
     }
